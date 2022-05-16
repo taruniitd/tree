@@ -1,1 +1,69 @@
 
+#include <iostream>
+using namespace std;
+
+struct node
+{
+    int val;
+    struct node* left;
+    struct node* right;
+
+    node(int v)
+    {
+       val = v;
+       left = nullptr;
+       right = nullptr;
+    }
+};
+
+void findMinMaxHorizontalDist(struct node* curNode, int* min, int* max, int hd)
+{
+    if(curNode == nullptr)
+        return; 
+    if(hd < *min)
+        *min = hd;
+    else
+        if(hd > *max)
+            *max = hd;
+
+    findMinMaxHorizontalDist(curNode->left, min, max, hd-1);
+    findMinMaxHorizontalDist(curNode->right, min, max, hd+1);
+}
+
+void printSameVerticalNode(struct node* root, int vl, int hd)
+{
+    if(root == nullptr)
+        return;
+    if(vl == hd)
+        cout << "node at vertical line : vl = " << vl << "node val = " << root->val << endl;
+        
+    printSameVerticalNode(root->left, vl, hd - 1);
+    printSameVerticalNode(root->right, vl, hd + 1);
+    
+}
+
+void printVerticalOrderTraversal(struct node* root)
+{
+    int min = 0, max = 0, hd = 0;
+    findMinMaxHorizontalDist(root, &min, &max, hd);    
+    cout << "min hd = " << min << "max hd = " << max << endl;
+    for(int vl = min; vl <= max; vl++)
+        printSameVerticalNode(root, vl, 0);
+}
+
+int main() {
+    struct node* root = new struct node(1);
+    root->left = new struct node(2);
+    root->right = new struct node(3);
+    root->left->left = new struct node(4);
+    root->left->right = new struct node(5);
+    root->right->left = new struct node(6);
+    root->right->right = new struct node(7);
+    root->right->right->left = new struct node(8);
+    root->right->right->right = new struct node(9);
+    
+    printVerticalOrderTraversal(root);
+    
+    //printVerticalOrderTraversalUsingMap(root);
+	return 0;
+}
