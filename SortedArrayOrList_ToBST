@@ -1,0 +1,131 @@
+#include <iostream>
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct lNode
+{
+    int val;
+    struct lNode* next;
+    
+    lNode(int v)
+    {
+        val = v;
+        next = nullptr;
+    }
+};
+
+struct tNode
+{
+    int val;
+    struct tNode* left;
+    struct tNode* right;
+
+    tNode(int v)
+    {
+        val = v;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+void push(struct lNode** lRoot, int curVal)
+{
+    struct lNode* temp = new struct lNode(curVal);
+    temp->next = *lRoot;
+    *lRoot = temp;
+}
+int countNodesInList(struct lNode* lRoot)
+{
+    int count = 0;
+    while(lRoot != nullptr)
+    {
+        lRoot = lRoot->next;
+        count++;
+    }
+    return count;
+}
+
+struct tNode* sortListToBST(struct lNode** lRoot, int numNodes)
+{
+    if(numNodes <= 0)
+    {
+        //cout << "return null" << endl;
+        return nullptr;
+    }
+
+    //cout << "node num : " << numNodes << "*lRoot = " << (*lRoot)->val << endl;
+    struct tNode *left = sortListToBST(lRoot, numNodes/2);
+    
+    struct tNode *curTreeRoot = new struct tNode((*lRoot)->val);
+    //cout << "cur lRoot val : " << (*lRoot)->val << "curTreeRoot : " << curTreeRoot << endl;
+    
+    curTreeRoot->left = left;
+    (*lRoot) = (*lRoot)->next;
+    //cout << "node num : " << numNodes << "left = " << left << endl; 
+    curTreeRoot->right = sortListToBST(lRoot, numNodes - numNodes/2 -1);
+    //cout << "curTreeRoot->right = " << curTreeRoot->right << endl;
+    //cout << "return new node" << endl;
+    return curTreeRoot;
+}
+
+struct tNode* sortArryToBST(int arr[], int start, int end)
+{
+    if(start > end)
+        return nullptr;
+    int mid = (start + end) / 2;
+    
+    struct tNode* curTreeRoot = new struct tNode(arr[mid]);
+    
+    curTreeRoot->left = sortArryToBST(arr, start, mid - 1);
+    curTreeRoot->right = sortArryToBST(arr, mid + 1, end);
+    return curTreeRoot;
+}
+
+void printTree(struct tNode* root)
+{
+    if(root == nullptr)
+        return;
+    cout << root->val;
+    printTree(root->left);
+    printTree(root->right);
+}
+
+void printInOrderTree(struct tNode* root)
+{
+    if(root == nullptr)
+        return;
+    printTree(root->left);
+    cout << root->val;
+    printTree(root->right);
+}
+int main() {
+	//int arr = { 1 3 4 6 7  9 };
+	int arr[] = { 1, 2, 3, 4, 5, 6, 7};
+	int arrLen = sizeof(arr) / sizeof(arr[0]);
+	
+	struct lNode* lRoot = new struct lNode(7);
+	
+	/**push(&lRoot, 3);
+    push(&lRoot, 4);
+    push(&lRoot, 6);
+    push(&lRoot, 7);
+    push(&lRoot, 9);*/
+    push(&lRoot, 6);
+    push(&lRoot, 5);
+    push(&lRoot, 4);
+    push(&lRoot, 3);
+    push(&lRoot, 2);
+    push(&lRoot, 1);
+    int numNodes = countNodesInList(lRoot);
+    
+    struct tNode* rootBSToverList = sortListToBST(&lRoot,numNodes);
+    cout << "Print BST for list : " << endl;
+    printInOrderTree(rootBSToverList);
+    printTree(rootBSToverList);
+    struct tNode* rootBSToverArr = sortArryToBST(arr, 0, arrLen - 1);
+    cout << "Print BST for arr : " << endl;
+    printInOrderTree(rootBSToverArr);
+    printTree(rootBSToverArr);
+	return 0;
+}
