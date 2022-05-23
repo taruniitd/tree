@@ -1,0 +1,87 @@
+//https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
+#include <iostream>
+using namespace std;
+
+struct node
+{
+    int val;
+    struct node* left;
+    struct node* right;
+    node(int v)
+    {
+        val = v;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+struct node* insert(struct node* root, int cur)
+{
+    if(root == nullptr)
+    {
+        struct node* root = new struct node(cur);
+        return root;
+    }
+    
+    if(cur < root->val)
+        root->left = insert(root->left, val);
+    else
+        root->right = insert(root->right, val);
+    
+    return root;
+}
+
+struct node* nextMinValNode(struct node* current)
+{   
+    struct node* temp = current;
+    
+    while(current && current->left != nullptr)
+        current = current->left;
+    
+    return current;
+}
+
+void delete(struct node* root, int remVal)
+{
+    if(root == nullptr)
+        return;
+    if(remVal < root->val)
+        delete(root->left, remVal);
+    else
+        if(remVal > root->val)
+            delete(root->right, remVal);
+        else
+            if(root->left == nullptr && root->right == nullptr)
+                return nullptr;
+            else
+                if(root->left == nullptr)
+                {
+                    struct node* temp = root->right;
+                    free(root);
+                    return temp;
+                }
+                else 
+                    if(root->right == nullptr)
+                    {
+                        struct node* temp = root->left;
+                        free(root);
+                        return temp;
+                    }
+                    struct node* nextMin = nextMinValNode(root->right);
+    
+                    root->val = nextMin->val;
+                    root->right = 
+}
+int main() {
+	struct node* root = new struct node(50);
+	insert(root, 30);
+	insert(root, 60);
+	insert(root, 40);
+	insert(root, 70);
+	insert(root, 20);
+	insert(root, 10);
+	
+	delete(root, 30);
+	
+	return 0;
+}
