@@ -24,9 +24,9 @@ struct node* insert(struct node* root, int cur)
     }
     
     if(cur < root->val)
-        root->left = insert(root->left, val);
+        root->left = insert(root->left, cur);
     else
-        root->right = insert(root->right, val);
+        root->right = insert(root->right, cur);
     
     return root;
 }
@@ -41,36 +41,58 @@ struct node* nextMinValNode(struct node* current)
     return current;
 }
 
-void delete(struct node* root, int remVal)
+struct node* deleteNode(struct node* root, int remVal)
 {
     if(root == nullptr)
-        return;
+        return nullptr;
     if(remVal < root->val)
-        delete(root->left, remVal);
+        deleteNode(root->left, remVal);
     else
+    {
         if(remVal > root->val)
-            delete(root->right, remVal);
+            deleteNode(root->right, remVal);
         else
+        {
             if(root->left == nullptr && root->right == nullptr)
                 return nullptr;
             else
+            {
                 if(root->left == nullptr)
                 {
                     struct node* temp = root->right;
                     free(root);
                     return temp;
                 }
-                else 
+                else
+                {
                     if(root->right == nullptr)
                     {
                         struct node* temp = root->left;
                         free(root);
                         return temp;
                     }
+                    else
+                    {
+                
                     struct node* nextMin = nextMinValNode(root->right);
     
                     root->val = nextMin->val;
-                    root->right = 
+                    root->right = deleteNode(root->right, nextMin->val);
+                    }
+                }
+            }
+        }
+    }    
+
+    return root;
+}
+void inorderTraversal(struct node* root)
+{
+    if(root == nullptr)
+        return;
+    inorderTraversal(root->left);
+    std::cout <<  root->val << "     ";
+    inorderTraversal(root->right);
 }
 int main() {
 	struct node* root = new struct node(50);
@@ -81,7 +103,8 @@ int main() {
 	insert(root, 20);
 	insert(root, 10);
 	
-	delete(root, 30);
-	
+	inorderTraversal(root);
+	deleteNode(root, 30);
+	inorderTraversal(root);
 	return 0;
 }
