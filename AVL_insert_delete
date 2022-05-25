@@ -38,17 +38,46 @@ int getBalance(struct node* root)
     else
         return (height(root->left) - height(root->right));
 }
+
+struct node* rightRotate(struct node* y)
+{
+    struct node* x = y->left;
+    struct node* T2 = x->right;
+    
+    x->right = y;
+    y->left = T2;
+    
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+
+    return x;
+}
+
+struct node* leftRotate(struct node* x)
+{
+    struct node* y = x->right;
+    struct node* T2 = y->left;
+    
+    y->left = x;
+    x->right = T2;
+    
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+
+    return y;
+}
+
 struct node* insert(struct node* root, int key)
 {
     if(root == nullptr)
-        return node(key);
+        return new struct node(key);
     
-    if(key < root->key )
+    if(key < root->val )
         root->left = insert(root->left, key);
         
     else
     {
-        if(key > root->key)
+        if(key > root->val)
             root->right = insert(root->right, key);
         else
             return root;
@@ -58,6 +87,52 @@ struct node* insert(struct node* root, int key)
     
     int balance = getBalance(root);
     
-    
+    //left-left case // right rotate
+    if((balance > 1) && (key < root->left->val))
+    {
+        cout << "right rotate :" << endl;
+        return rightRotate(root);
     }
+    //right-right case // left rotate
+    if((balance < -1) && (key > root->right->val))
+    {
+        cout << "left rotate :" << endl;
+        return leftRotate(root);
+    }
+    //left-right rotate
+    if((balance > 1) && (key > root->left->val))
+    {
+        cout << "left-right :" << endl;
+        root->left = leftRotate(root->left);
+        return rightRotate(root);
+    }
+    //right-left rotate
+    if((balance < -1) && (key < root->right->val))
+    {
+        cout << "right-left :" << endl;
+        root->right = rightRotate(root->right);
+        return leftRotate(root);
+    }
+    return root;
+}
+
+void inorderTraversal(struct node* root)
+{
+    if(root == nullptr)
+        return;
+    inorderTraversal(root->left);
+    cout << root->val << "   ";
+    inorderTraversal(root->right);
+    
+}
+
+int main()
+{
+    struct node* root = new struct node(50);
+    root = insert(root, 30);
+    root = insert(root, 20);
+    root = insert(root, 60);
+    root = insert(root, 70);
+    
+    inorderTraversal(root);
 }
