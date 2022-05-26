@@ -47,9 +47,11 @@ struct node* rightRotate(struct node* y)
     x->right = y;
     y->left = T2;
     
-    x->height = max(height(x->left), height(x->right)) + 1;
     y->height = max(height(y->left), height(y->right)) + 1;
-
+    x->height = max(height(x->left), height(x->right)) + 1;
+    
+    //cout << "x val = " << x->val << "x height = " << x->height << endl;
+    //cout << "y val = " << y->val << "y height = " << y->height << endl;
     return x;
 }
 
@@ -61,10 +63,21 @@ struct node* leftRotate(struct node* x)
     y->left = x;
     x->right = T2;
     
-    y->height = max(height(y->left), height(y->right)) + 1;
     x->height = max(height(x->left), height(x->right)) + 1;
-
+    y->height = max(height(y->left), height(y->right)) + 1;
+    
+    //cout << "x val = " << x->val << "x height = " << x->height << endl;
+    //cout << "y val = " << y->val << "y height = " << y->height << endl;
     return y;
+}
+
+struct node* nextMinValueNode(struct node* root)
+{
+    struct node* cur = root;
+    while(cur->left != nullptr)
+        cur = cur->left;
+    
+    return cur;
 }
 
 struct node* insert(struct node* root, int key)
@@ -86,7 +99,7 @@ struct node* insert(struct node* root, int key)
     root->height = 1 + max(height(root->left), height(root->right));
     
     int balance = getBalance(root);
-    
+    //cout << "balance = " << "   " << balance << endl;
     //left-left case // right rotate
     if((balance > 1) && (key < root->left->val))
     {
@@ -116,6 +129,64 @@ struct node* insert(struct node* root, int key)
     return root;
 }
 
+struct node* deleteNode(struct node* root, int key)
+{
+    if(root == nullptr)
+        return nullptr;
+    if(key < root->val)
+        root->left = deleteNode(root->left, key);
+    else
+        if(key > root->val)
+            root->right = deleteNode(root->right, key);
+        else
+        {
+            if((root->left == nullptr) || (root->right == nullptr))
+            {
+                struct node* temp = root->left ? root->left : root->right;
+                
+                if(temp == nullptr)
+                {
+                    temp = root;
+                    root = nullptr;
+                }
+                else
+                    *root = *temp;
+                
+                free(temp);
+            }
+            else
+            {
+                cout << "current node has both left and right child" << endl;
+                struct node* temp = nextMinValueNode(root->right);
+                root->val = temp->val;
+                
+                root->right = deleteNode(root->right, temp->val);
+            }
+        }
+        if(root == nullptr)
+            return nullptr;
+        
+        root->height = max(height(root->left), height(root->right)) + 1;
+        int balance = getBalance(root);
+        cout << "balance = " << balance << endl;
+        if((balance > 1) && getBalance(root->left) >= 0)
+            return rightRotate(root);
+        if((balance > 1) && (getBalance(root->left) < 0))
+        {
+            root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+        if((balance < -1) && (getBalance(root->right) <= 0))
+            return leftRotate(root);
+        if((balance < -1) && (getBalance(root->right) > 0))
+        {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+    cout << "delete done = " << endl;
+    return root;
+}
+
 void inorderTraversal(struct node* root)
 {
     if(root == nullptr)
@@ -133,6 +204,17 @@ int main()
     root = insert(root, 20);
     root = insert(root, 60);
     root = insert(root, 70);
+    root = insert(root, 80);
+    root = insert(root, 57);
+    root = insert(root, 58);
+    root = insert(root, 35);
+    root = insert(root, 68);
+    root = insert(root, 69);
     
+    inorderTraversal(root);
+    cout << "After delete " << endl;
+    root = deleteNode(root, 60);
+    inorderTraversal(root);
+    root = deleteNode(root, 50);
     inorderTraversal(root);
 }
