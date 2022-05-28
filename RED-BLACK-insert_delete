@@ -1,7 +1,8 @@
 #include <iostream>
+#include <bits/stdc++.h>
 using namespace std;
 
-typedef enum = { RED, BLACK};
+enum Color { RED, BLACK};
 struct node 
 {
     int curVal;
@@ -16,7 +17,7 @@ struct node
     }
 };
 
-struct node* rotateRight(struct node* root, struct node*gParent)
+struct node* rotateRight(struct node* root, struct node* gParent)
 {
     struct node* gp_left = gParent->left;
     
@@ -27,7 +28,7 @@ struct node* rotateRight(struct node* root, struct node*gParent)
     
     gp_left->parent = gParent->parent;
     
-    if(gParent-> parent == nullptr)
+    if(gParent->parent == nullptr)
         root = gp_left;
     else if(gParent == gParent->parent->left)
         gParent->parent->left = gp_left;
@@ -36,6 +37,8 @@ struct node* rotateRight(struct node* root, struct node*gParent)
         
     gp_left->right = gParent;
     gParent->parent = gp_left;
+
+    return root;
 }
 
 struct node* rotateLeft(struct node* root, struct node* gParent)
@@ -59,9 +62,10 @@ struct node* rotateLeft(struct node* root, struct node* gParent)
     gp_right->left = gParent;
     gParent->parent = gp_right;
     
+    return root;
 }
 
-struct node* fixViolation(struct node* root, struct node* newNode)
+void fixViolation(struct node* root, struct node* newNode)
 {
     struct node *newNodeParent = nullptr, *newNodeGrandParent = nullptr;
 
@@ -120,20 +124,20 @@ struct node* fixViolation(struct node* root, struct node* newNode)
     root->color = BLACK;
 }
 
-struct node* BSTinsert(struct node* curNode, int newNode)
+struct node* BSTinsert(struct node* curNode, struct node* newNode)
 {
     if(curNode == nullptr)
         return newNode;
         
     if(curNode->curVal < newNode->curVal)
     {
-        curNode->left = BSTinsert(curNode->left, newNode->curVal)
+        curNode->left = BSTinsert(curNode->left, newNode);
         curNode->left->parent = curNode;
     }
     
     if(curNode->curVal > newNode->curVal)
     {
-        curNode->right = BSTinsert(curNode->right, newNode->curVal);
+        curNode->right = BSTinsert(curNode->right, newNode);
         curNode->right->parent = curNode;
     }
     
