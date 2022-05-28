@@ -38,7 +38,7 @@ struct node* rotateRight(struct node* root, struct node*gParent)
     gParent->parent = gp_left;
 }
 
-struct node* rotateleft(struct node* root, struct node* gParent)
+struct node* rotateLeft(struct node* root, struct node* gParent)
 {
     struct node* gp_right = gParent->right;
     
@@ -70,31 +70,54 @@ struct node* fixViolation(struct node* root, struct node* newNode)
         newNodeParent = newNode->parent;
         newNodeGrandParent = newNode->parent->parent;
         
-        if(newNodeParent = newNodeGrandParent->left)
+        if(newNodeParent == newNodeGrandParent->left)
         {
             struct node* uncle = newNodeGrandParent->right;
             
             if((uncle != nullptr) && (uncle->color == RED))
             {
                 newNodeGrandParent->color = RED;
+                newNodeParent->color = uncle->color = BLACK;
+                newNode = newNodeGrandParent;
+            }
+            else
+            {
+                if(newNode == newNodeParent->right)
+                {
+                    rotateLeft(root, newNodeParent);
+                    newNode = newNodeParent;
+                    newNodeParent = newNode->parent;
+                }
                 
+                rotateRight(root, newNodeGrandParent);
+                swap(newNodeParent->color, newNodeGrandParent->color);
+                newNode = newNodeParent;
             }
         }
         else
         {
-            
+            struct node* uncle = newNodeGrandParent->left;
+            if((uncle != nullptr) && (uncle->color == RED))
+            {
+                newNodeGrandParent->color = RED;
+                newNodeParent->color = uncle->color = BLACK;
+                newNode = newNodeGrandParent;
+            }
+            else
+            {
+                if(newNode == newNodeParent->left)
+                {
+                    rotateRight(root, newNodeParent);
+                    newNode = newNodeParent;
+                    newNodeParent = newNode->parent;
+                }
+                rotateLeft(root, newNodeGrandParent);
+                swap(newNodeParent->color, newNodeGrandParent->color);
+                newNode = newNodeParent;
+            }
         }
     }
-    
-    
-    
-}
-
-struct node* insert(struct node* curNode, int key)
-{
-    struct node* newNode = new struct node(key);
-    curNode = BSTinsert(curNode, newNode);
-    fixViolation(curNode, newNode);
+    root->color = BLACK;
 }
 
 struct node* BSTinsert(struct node* curNode, int newNode)
@@ -104,13 +127,13 @@ struct node* BSTinsert(struct node* curNode, int newNode)
         
     if(curNode->curVal < newNode->curVal)
     {
-        curNode->left = insert(curNode->left, newNode->curVal)
+        curNode->left = BSTinsert(curNode->left, newNode->curVal)
         curNode->left->parent = curNode;
     }
     
     if(curNode->curVal > newNode->curVal)
     {
-        curNode->right = insert(curNode->right, newNode->curVal);
+        curNode->right = BSTinsert(curNode->right, newNode->curVal);
         curNode->right->parent = curNode;
     }
     
@@ -118,11 +141,32 @@ struct node* BSTinsert(struct node* curNode, int newNode)
     return curNode;
 }
 
+
+struct node* insert(struct node* curNode, int key)
+{
+    struct node* newNode = new struct node(key);
+    curNode = BSTinsert(curNode, newNode);
+    fixViolation(curNode, newNode);
+
+    return curNode;
+}
+
+struct node* inorderTraversal(struct node* root)
+{
+    if(root == nullptr)
+        return nullptr;
+    inorderTraversal(root->left);
+    cout << root->curVal;
+    inorderTraversal(root->right);
+}
+
 int main() {
 	struct node* root = new struct node(50);
 	
 	root = insert(root, 40);
 	root = insert(root, 30);
+	
+	inorderTraversal(root);
 	
 	return 0;
 }
