@@ -71,6 +71,7 @@ void fixViolation(struct node* root, struct node* newNode)
 
     while((newNode != root) && (newNode->color == RED) && (newNode->parent->color == RED))
     {
+        cout << "fixViolation :" << endl;
         newNodeParent = newNode->parent;
         newNodeGrandParent = newNode->parent->parent;
         
@@ -88,11 +89,12 @@ void fixViolation(struct node* root, struct node* newNode)
             {
                 if(newNode == newNodeParent->right)
                 {
+                    cout << "rotateLeft :" << endl;
                     rotateLeft(root, newNodeParent);
                     newNode = newNodeParent;
                     newNodeParent = newNode->parent;
                 }
-                
+                cout << "rotateRight :" << endl;
                 rotateRight(root, newNodeGrandParent);
                 swap(newNodeParent->color, newNodeGrandParent->color);
                 newNode = newNodeParent;
@@ -166,8 +168,9 @@ struct node* inorderTraversal(struct node* root)
 
 int main() {
 	struct node* root = new struct node(50);
-	
+	cout << "insert 40 :" << endl;
 	root = insert(root, 40);
+	cout << "insert 30 :" << endl;
 	root = insert(root, 30);
 	
 	inorderTraversal(root);
