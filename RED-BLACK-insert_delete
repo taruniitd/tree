@@ -157,6 +157,142 @@ struct node* insert(struct node* curNode, int key)
     return curNode;
 }
 
+struct node* search(struct node* root, int val)
+{
+    struct node* temp = root;
+    
+    while(temp != nullptr)
+    {
+        if(val > temp->left)
+        {
+            if(temp->left == nullptr)
+                break;
+            else
+                temp = temp->left;
+        }
+        else
+        {
+            if(val == temp->val)
+            {
+                break;
+            }
+            else
+            {
+                if(temp->right == nullptr)
+                    break;
+                else
+                    temp = temp->right;
+            }
+        }
+    }
+    return temp;
+}
+
+struct node* sucessor(struct node* curRight)
+{
+    while(curRight->left != nullptr)
+        curRight = curRight->left;
+    return curRight;
+}
+
+struct node* FindNextU(struct node* curV)
+{
+    if(curV->left == nullptr && curV->right == nullptr)
+    {
+        return nullptr;
+    }
+    else if(curV->left == nullptr)
+    {
+        return curV->left;
+    } else if(curV->right == nullptr)
+    {
+        return curV->right;
+    } else if(curV->left != nullptr && curV->right != nullptr)
+    {
+        return sucessor(curV->right);
+    }
+}
+void deleteNode(struct node* root, int val)
+{
+    
+    //find its u for current v node
+    struct node* u = FindNextU(root)
+
+    bool uvBlack = ((u == nullptr) or (u->color == BLACK)) && (v->color == BLACK));
+    struct node* parent = v->parent;
+    if(u == nullptr)
+    {
+        if(v == root)
+            root = nullptr;
+        else if(uvBlack)
+        {
+            fixDoubleBlack(v);
+        }
+        else if(v->sibling() != nullptr)
+        {
+            v->sibling()->color = RED;
+        }
+        
+        if(v->isOnbLeft())
+        {
+            parent->left = nullptr;
+        }
+        else
+        {
+            parent->right = nullptr;
+        }
+        delete v;
+        return;
+    }
+    else
+    {
+        if(v->left == nullptr || v->right == nullptr)
+        {
+            if(v == root)
+            {
+                v->curVal = u->curVal;
+                v->left = v->right = nullptr;
+                delete u;
+            }
+            if(v->isOnbLeft())
+            {
+                parent->left = u;
+            }
+            else
+            {
+                parent->right = v;
+            }
+            delete v;
+            u->parent = parent;
+            if(uvBlack)
+            {
+                fixDoubleBlack(u);
+            }
+            else
+                u->color = BLACK;
+            
+            return;
+        }
+    }
+    //v has 2 children. swap value with sucessor and recurse
+    swapValue(u,v);
+    deleteNode(u);
+}
+
+
+void deletebyVal(struct node* root, int val)
+{
+    struct node* v = search(val), *u;
+    
+    if(v->curVal != val)
+    {
+        cout << "searched element is not found" << endl;
+        return;
+    }
+    deleteNode(root, v);
+    
+}
+
 struct node* inorderTraversal(struct node* root)
 {
     if(root == nullptr)
@@ -174,6 +310,7 @@ int main() {
 	root = insert(root, 30);
 	
 	inorderTraversal(root);
-	
+
+    deleteNode(root, 40);	
 	return 0;
 }
