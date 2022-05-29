@@ -1,110 +1,450 @@
-//https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
 #include <iostream>
+#include <bits/stdc++.h>
 using namespace std;
 
-struct node
+enum Color { RED, BLACK};
+struct node 
 {
-    int val;
-    struct node* left;
-    struct node* right;
-    node(int v)
+    int curVal;
+    bool color;
+    struct node* left, *right, *parent;
+    
+    node(int val)
     {
-        val = v;
-        left = nullptr;
-        right = nullptr;
+        curVal = val;
+        color = RED;
+        left = right = parent = nullptr;
     }
 };
 
-struct node* insert(struct node* root, int cur)
+struct node* rotateRight(struct node *&root, struct node *&gParent)
 {
-    if(root == nullptr)
-    {
-        struct node* root = new struct node(cur);
-        return root;
-    }
+    struct node* gp_left = gParent->left;
     
-    if(cur < root->val)
-        root->left = insert(root->left, cur);
+    gParent->left = gp_left->right;
+    
+    if(gParent->left != nullptr)
+        gParent->left->parent = gParent;
+    
+    gp_left->parent = gParent->parent;
+    
+    if(gParent->parent == nullptr)
+        root = gp_left;
+    else if(gParent == gParent->parent->left)
+        gParent->parent->left = gp_left;
     else
-        root->right = insert(root->right, cur);
+        gParent->parent->right = gp_left;
+        
+    gp_left->right = gParent;
+    gParent->parent = gp_left;
+
+    return root;
+}
+
+struct node* rotateLeft(struct node *&root, struct node *&gParent)
+{
+    struct node* gp_right = gParent->right;
+    
+    gParent->right = gp_right->left;
+    
+    if(gParent->right != nullptr)
+        gParent->right->parent = gParent;
+    
+    gp_right->parent = gParent->parent;
+    
+    if(gParent->parent == nullptr)
+        root =gp_right;
+    else if(gParent == gParent->parent->right)
+        gParent->parent->right = gp_right;
+    else
+        gParent->parent->left = gp_right;
+        
+    gp_right->left = gParent;
+    gParent->parent = gp_right;
     
     return root;
 }
 
-struct node* nextMinValNode(struct node* current)
-{   
-    struct node* temp = current;
-    
-    while(current && current->left != nullptr)
-        current = current->left;
-    
-    return current;
-}
-
-struct node* deleteNode(struct node* root, int remVal)
+void fixViolation(struct node *&root, struct node *&newNode)
 {
-    if(root == nullptr)
-        return nullptr;
-    if(remVal < root->val)
-        deleteNode(root->left, remVal);
-    else
+    struct node *newNodeParent = nullptr, *newNodeGrandParent = nullptr;
+
+    while((newNode != root) && (newNode->color == RED) && (newNode->parent->color == RED))
     {
-        if(remVal > root->val)
-            deleteNode(root->right, remVal);
-        else
+        cout << "fixViolation :" << endl;
+        newNodeParent = newNode->parent;
+        newNodeGrandParent = newNode->parent->parent;
+        
+        if(newNodeParent == newNodeGrandParent->left)
         {
-            if(root->left == nullptr && root->right == nullptr)
-                return nullptr;
+            struct node* uncle = newNodeGrandParent->right;
+            
+            if((uncle != nullptr) && (uncle->color == RED))
+            {
+                newNodeGrandParent->color = RED;
+                newNodeParent->color = uncle->color = BLACK;
+                newNode = newNodeGrandParent;
+            }
             else
             {
-                if(root->left == nullptr)
+                if(newNode == newNodeParent->right)
                 {
-                    struct node* temp = root->right;
-                    free(root);
-                    return temp;
+                    cout << "rotateLeft :" << endl;
+                    rotateLeft(root, newNodeParent);
+                    newNode = newNodeParent;
+                    newNodeParent = newNode->parent;
                 }
-                else
+                cout << "rotateRight :" << endl;
+                rotateRight(root, newNodeGrandParent);
+                swap(newNodeParent->color, newNodeGrandParent->color);
+                newNode = newNodeParent;
+            }
+        }
+        else
+        {
+            struct node* uncle = newNodeGrandParent->left;
+            if((uncle != nullptr) && (uncle->color == RED))
+            {
+                newNodeGrandParent->color = RED;
+                newNodeParent->color = uncle->color = BLACK;
+                newNode = newNodeGrandParent;
+            }
+            else
+            {
+                if(newNode == newNodeParent->left)
                 {
-                    if(root->right == nullptr)
+                    rotateRight(root, newNodeParent);
+                    newNode = newNodeParent;
+                    newNodeParent = newNode->parent;
+                }
+                rotateLeft(root, newNodeGrandParent);
+                swap(newNodeParent->color, newNodeGrandParent->color);
+                newNode = newNodeParent;
+            }
+        }
+    }
+    root->color = BLACK;
+}
+
+struct node* BSTinsert(struct node *&curNode, struct node *&newNode)
+{
+    if(curNode == nullptr)
+        return newNode;
+        
+    if(curNode->curVal > newNode->curVal)
+    {
+        curNode->left = BSTinsert(curNode->left, newNode);
+        curNode->left->parent = curNode;
+    }
+    
+    if(curNode->curVal < newNode->curVal)
+    {
+        curNode->right = BSTinsert(curNode->right, newNode);
+        curNode->right->parent = curNode;
+    }
+    
+    
+    return curNode;
+}
+
+
+struct node* insert(struct node *&curNode, int key)
+{
+    struct node* newNode = new struct node(key);
+    curNode = BSTinsert(curNode, newNode);
+    fixViolation(curNode, newNode);
+
+    return curNode;
+}
+
+struct node* search(struct node* root, int val)
+{
+    struct node* temp = root;
+    
+    while(temp != nullptr)
+    {
+        if(val < temp->left->curVal)
+        {
+            if(temp->left == nullptr)
+                break;
+            else
+                temp = temp->left;
+        }
+        else
+        {
+            if(val == temp->curVal)
+            {
+                break;
+            }
+            else
+            {
+                if(temp->right == nullptr)
+                    break;
+                else
+                    temp = temp->right;
+            }
+        }
+    }
+    return temp;
+}
+
+struct node* sucessor(struct node* curRight)
+{
+    while(curRight->left != nullptr)
+        curRight = curRight->left;
+
+    cout << "next element is : " << curRight->curVal << "  " << endl;
+    return curRight;
+}
+
+struct node* FindNextU(struct node *&curV)
+{
+    cout << " search its u for v = : " << curV->curVal << "  " << endl; 
+    if(curV->left == nullptr && curV->right == nullptr)
+    {
+        cout << "both children are null " <<endl;
+        return nullptr;
+    }
+    else if(curV->left == nullptr)
+    {
+        return curV->left;
+    } else if(curV->right == nullptr)
+    {
+        return curV->right;
+    } else if(curV->left != nullptr && curV->right != nullptr)
+    {
+        cout << " both left and right child are present :" << endl;
+        return sucessor(curV->right);
+    }
+}
+
+bool isOnbLeft(struct node* root)
+{
+    cout << "ist : " << root->parent->left->curVal << "2nd " <<  root->curVal <<endl;
+    if(root->parent->left->curVal == root->curVal)
+        return true;
+    
+    return false;
+}
+struct node* siblingNode(struct node* x)
+{
+    if(x->parent == nullptr)
+        return nullptr;
+    if(isOnbLeft(x))
+    {
+        cout << "right sibling " << endl;
+        return x->parent->right;
+    }
+    cout << "left sibling " << endl;
+    return x->parent->left;
+}
+
+bool hasRedChild(struct node* root)
+{
+    if(((root != nullptr) && (root->left != nullptr) && (root->left->color == RED)) ||
+        ((root != nullptr) && (root->right != nullptr) && (root->right->color == RED)))
+        return true;
+}
+void fixDoubleBlack(struct node* root, struct node* x)
+{
+    if(x == root)
+        return;
+    
+    struct node* sibling = siblingNode(x), *parent = x->parent;
+
+    if(sibling == nullptr)
+    {
+        fixDoubleBlack(root, parent);
+    }
+    else
+    {
+        if(sibling->color == RED)
+        {
+            parent->color = RED;
+            sibling->color = BLACK;
+            if(isOnbLeft(sibling))
+                rotateRight(root, parent);
+            else
+                rotateLeft(root, parent);
+            
+            fixDoubleBlack(root, x);
+        }
+        else
+        {
+            //sibling is black
+            if(hasRedChild(sibling))
+            {
+                if(sibling->left != nullptr and sibling->left->color == RED)
+                {
+                    if(isOnbLeft(sibling))
                     {
-                        struct node* temp = root->left;
-                        free(root);
-                        return temp;
+                        sibling->left->color = sibling->color;
+                        sibling->color = sibling->parent->color;
+                        rotateRight(root, parent);
                     }
                     else
                     {
-                
-                    struct node* nextMin = nextMinValNode(root->right);
-    
-                    root->val = nextMin->val;
-                    root->right = deleteNode(root->right, nextMin->val);
+                        sibling->left->color = parent->color;
+                        rotateRight(root, sibling);
+                        rotateLeft(root, parent);
                     }
                 }
+                else
+                {
+                    if(isOnbLeft(sibling))
+                    {
+                        
+                        sibling->right->color = parent->color;
+                        rotateLeft(root, sibling);
+                        rotateRight(root, parent);
+                    }
+                    else
+                    {
+                        sibling->right->color = sibling->color;
+                        sibling->color = sibling->parent->color;
+                        rotateLeft(root, parent);
+                    }
+                }
+                parent->color = BLACK;
+            }
+            else
+            {
+                //2 black children
+                sibling->color = RED;
+                if(parent->color == BLACK)
+                    fixDoubleBlack(root, parent);
+                else
+                    parent->color = BLACK;
             }
         }
-    }    
+    } //sibling null or not
+} //fixDoubleBlack
 
-    return root;
+void swapValue(struct node *&u, struct node *&v)
+{
+    int temp = u->curVal;
+    u->curVal = v->curVal;
+    v->curVal = temp;
 }
+
+void deleteNode(struct node *&root, struct node *&v)
+{
+    
+    //find its u for current v node
+    struct node* u = FindNextU(v);
+
+    bool uvBlack = ((u == nullptr) or (u->color == BLACK)) && (v->color == BLACK);
+    struct node* parent = v->parent;
+    if(u == nullptr)
+    {
+        cout << "current u is null " << endl;
+        if(v == root)
+            root = nullptr;
+        else if(uvBlack)
+        {
+            cout << " u and v both are black: " << endl;
+            fixDoubleBlack(root, v);
+        }
+        else if(siblingNode(v) != nullptr)
+        {
+            cout << "sibling of current node non-null " << "  " << endl;
+            siblingNode(v)->color = RED;
+        }
+        
+        if(isOnbLeft(v))
+        {
+            parent->left = nullptr;
+        }
+        else
+        {
+            cout << "set right of current parent to null " << endl;
+            parent->right = nullptr;
+        }
+        cout << "deleting node : " << v->curVal << "  " << endl;
+        delete v;
+        return;
+    }
+    else
+    {
+        cout << "current u is : " << u->curVal << endl;
+        if(v->left == nullptr || v->right == nullptr)
+        {
+            if(v == root)
+            {
+                v->curVal = u->curVal;
+                v->left = v->right = nullptr;
+                delete u;
+            }
+            if(isOnbLeft(v))
+            {
+                parent->left = u;
+            }
+            else
+            {
+                parent->right = v;
+            }
+            delete v;
+            u->parent = parent;
+            if(uvBlack)
+            {
+                fixDoubleBlack(root, u);
+            }
+            else
+                u->color = BLACK;
+            
+            return;
+        }
+    }
+    //v has 2 children. swap value with sucessor and recurse
+    cout << "swap u : " << u->curVal << " with " << "v : " << v->curVal;
+    cout << "v -> left = " << v->left->curVal <<endl;
+    swapValue(u,v);
+    deleteNode(root, u);
+}
+
+
+void deletebyVal(struct node *&root, int val)
+{
+    struct node* v = search(root, val), *u;
+    
+    if(v->curVal != val)
+    {
+        cout << "searched element is not found" << endl;
+        return;
+    }
+    deleteNode(root, v);
+    
+}
+
 void inorderTraversal(struct node* root)
 {
     if(root == nullptr)
         return;
+    
     inorderTraversal(root->left);
-    std::cout <<  root->val << "     ";
+    cout << "tree's val : " << root->curVal <<"  " << " its color : " << root->color << endl;
     inorderTraversal(root->right);
 }
+
 int main() {
-	struct node* root = new struct node(50);
-	insert(root, 30);
-	insert(root, 60);
-	insert(root, 40);
-	insert(root, 70);
-	insert(root, 20);
-	insert(root, 10);
-	
+	struct node* root = nullptr;
+	cout << "insert 50 :" << endl;
+	root = insert(root, 50);
+	cout << "insert 40 :" << endl;
+	root = insert(root, 40);
+	cout << "insert 30 :" << endl;
+	root = insert(root, 30);
+	cout << "insert 60 :" << endl;
+	root = insert(root, 60);
+	cout << "insert 70 :" << endl;
+	root = insert(root, 70);
+	cout << "print current tree : " << endl;
+	root = insert(root, 55);
+	cout << "print current tree : " << endl;
 	inorderTraversal(root);
-	deleteNode(root, 30);
-	inorderTraversal(root);
+    /**cout << "delete node now :" << endl;
+    deletebyVal(root, 40);	
+    cout << "print current tree : " << endl;
+	inorderTraversal(root);*/
 	return 0;
 }
