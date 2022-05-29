@@ -212,6 +212,78 @@ struct node* FindNextU(struct node* curV)
         return sucessor(curV->right);
     }
 }
+
+bool isOnbLeft(struct node* root)
+{
+    return root->parent->left;
+}
+struct node* sibling(struct node* x)
+{
+    if(x->parent == nullptr)
+        return nullptr;
+    if(isOnbLeft(x))
+        return x->parent->right;
+    else
+        return x->parent->left;
+}
+
+bool hasRedChild(struct node* root)
+{
+    if(((root != nullptr) && (root->left != nullptr) && (root->left->color == RED)) ||
+        ((root != nullptr) && (root->right != nullptr) && (root->right->color == RED)))
+        return true;
+}
+void fixDoubleBlack(struct node* x)
+{
+    if(x == root)
+        return;
+    
+    struct node* sibling = x->sibling(x), *parent = x->parent;
+
+    if(sibling == nullptr)
+        fixDoubleBlack(parent);
+    else
+    {
+        if(sibling->color == RED)
+        {
+            parent->color = RED;
+            sibling->color = BLACK;
+            if(isOnbLeft(sibling))
+                rotateRight(parent);
+            else
+                rotateLeft(parent);
+            
+            fixDoubleBlack(x);
+        }
+        else
+        {
+            //sibling is black
+            if(hasRedChild(sibling))
+            {
+                if(sibling->left != nullptr and sibling->left->color == RED)
+                {
+                    if(isOnbLeft(sibling))
+                    {
+                        sibling->left = sibling->color;
+                        sibling->color = sibling->parent->color;
+                        rotateRight(parent);
+                    }
+                    else
+                    {
+                        sibling->left->color = parent->color;
+                        rotateRight(sibling);
+                        rotateLeft(parent);
+                    }
+                }
+                else
+                {
+                    
+                }
+            }
+        }
+        }
+    }
+}
 void deleteNode(struct node* root, int val)
 {
     
