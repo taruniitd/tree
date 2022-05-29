@@ -163,7 +163,7 @@ struct node* search(struct node* root, int val)
     
     while(temp != nullptr)
     {
-        if(val > temp->left)
+        if(val > temp->left->curVal)
         {
             if(temp->left == nullptr)
                 break;
@@ -172,7 +172,7 @@ struct node* search(struct node* root, int val)
         }
         else
         {
-            if(val == temp->val)
+            if(val == temp->curVal)
             {
                 break;
             }
@@ -217,7 +217,7 @@ bool isOnbLeft(struct node* root)
 {
     return root->parent->left;
 }
-struct node* sibling(struct node* x)
+struct node* siblingNode(struct node* x)
 {
     if(x->parent == nullptr)
         return nullptr;
@@ -233,15 +233,17 @@ bool hasRedChild(struct node* root)
         ((root != nullptr) && (root->right != nullptr) && (root->right->color == RED)))
         return true;
 }
-void fixDoubleBlack(struct node* x)
+void fixDoubleBlack(struct node* root, struct node* x)
 {
     if(x == root)
         return;
     
-    struct node* sibling = x->sibling(x), *parent = x->parent;
+    struct node* sibling = siblingNode(x), *parent = x->parent;
 
     if(sibling == nullptr)
-        fixDoubleBlack(parent);
+    {
+        fixDoubleBlack(root, parent);
+    }
     else
     {
         if(sibling->color == RED)
@@ -249,11 +251,11 @@ void fixDoubleBlack(struct node* x)
             parent->color = RED;
             sibling->color = BLACK;
             if(isOnbLeft(sibling))
-                rotateRight(parent);
+                rotateRight(root, parent);
             else
-                rotateLeft(parent);
+                rotateLeft(root, parent);
             
-            fixDoubleBlack(x);
+            fixDoubleBlack(root, x);
         }
         else
         {
@@ -264,15 +266,15 @@ void fixDoubleBlack(struct node* x)
                 {
                     if(isOnbLeft(sibling))
                     {
-                        sibling->left = sibling->color;
+                        sibling->left->color = sibling->color;
                         sibling->color = sibling->parent->color;
-                        rotateRight(parent);
+                        rotateRight(root, parent);
                     }
                     else
                     {
                         sibling->left->color = parent->color;
-                        rotateRight(sibling);
-                        rotateLeft(parent);
+                        rotateRight(root, sibling);
+                        rotateLeft(root, parent);
                     }
                 }
                 else
@@ -281,38 +283,45 @@ void fixDoubleBlack(struct node* x)
                     {
                         
                         sibling->right->color = parent->color;
-                        rotateLeft(sibling);
-                        rotateRight(parent);
+                        rotateLeft(root, sibling);
+                        rotateRight(root, parent);
                     }
                     else
                     {
                         sibling->right->color = sibling->color;
                         sibling->color = sibling->parent->color;
-                        rotateLeft(parent);
+                        rotateLeft(root, parent);
                     }
                 }
-            }
-            parent->color = BLACK;
-        }
-        else
-        {
-            //2 black children
-            sibling->color = RED;
-            if(parent->color == BLACK)
-                fixDoubleBlack(parent);
-            else
                 parent->color = BLACK;
+            }
+            else
+            {
+                //2 black children
+                sibling->color = RED;
+                if(parent->color == BLACK)
+                    fixDoubleBlack(root, parent);
+                else
+                    parent->color = BLACK;
+            }
         }
-        }
-    }
+    } //sibling null or not
+} //fixDoubleBlack
+
+void swapValue(struct node* v, struct node* u)
+{
+    int temp = v->curVal;
+    v->curVal = u->curVal;
+    u->curVal = v->curVal;
 }
-void deleteNode(struct node* root, int val)
+
+void deleteNode(struct node* root, struct node* v)
 {
     
     //find its u for current v node
-    struct node* u = FindNextU(root)
+    struct node* u = FindNextU(v);
 
-    bool uvBlack = ((u == nullptr) or (u->color == BLACK)) && (v->color == BLACK));
+    bool uvBlack = ((u == nullptr) or (u->color == BLACK)) && (v->color == BLACK);
     struct node* parent = v->parent;
     if(u == nullptr)
     {
@@ -320,14 +329,14 @@ void deleteNode(struct node* root, int val)
             root = nullptr;
         else if(uvBlack)
         {
-            fixDoubleBlack(v);
+            fixDoubleBlack(root, v);
         }
-        else if(v->sibling() != nullptr)
+        else if(siblingNode(v) != nullptr)
         {
-            v->sibling()->color = RED;
+            siblingNode(v)->color = RED;
         }
         
-        if(v->isOnbLeft())
+        if(isOnbLeft(v))
         {
             parent->left = nullptr;
         }
@@ -348,7 +357,7 @@ void deleteNode(struct node* root, int val)
                 v->left = v->right = nullptr;
                 delete u;
             }
-            if(v->isOnbLeft())
+            if(isOnbLeft(v))
             {
                 parent->left = u;
             }
@@ -360,7 +369,7 @@ void deleteNode(struct node* root, int val)
             u->parent = parent;
             if(uvBlack)
             {
-                fixDoubleBlack(u);
+                fixDoubleBlack(root, u);
             }
             else
                 u->color = BLACK;
@@ -370,13 +379,13 @@ void deleteNode(struct node* root, int val)
     }
     //v has 2 children. swap value with sucessor and recurse
     swapValue(u,v);
-    deleteNode(u);
+    deleteNode(root, u);
 }
 
 
 void deletebyVal(struct node* root, int val)
 {
-    struct node* v = search(val), *u;
+    struct node* v = search(root, val), *u;
     
     if(v->curVal != val)
     {
@@ -405,6 +414,6 @@ int main() {
 	
 	inorderTraversal(root);
 
-    deleteNode(root, 40);	
+    deletebyVal(root, 40);	
 	return 0;
 }
