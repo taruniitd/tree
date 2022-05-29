@@ -277,9 +277,31 @@ void fixDoubleBlack(struct node* x)
                 }
                 else
                 {
-                    
+                    if(isOnbLeft(sibling))
+                    {
+                        
+                        sibling->right->color = parent->color;
+                        rotateLeft(sibling);
+                        rotateRight(parent);
+                    }
+                    else
+                    {
+                        sibling->right->color = sibling->color;
+                        sibling->color = sibling->parent->color;
+                        rotateLeft(parent);
+                    }
                 }
             }
+            parent->color = BLACK;
+        }
+        else
+        {
+            //2 black children
+            sibling->color = RED;
+            if(parent->color == BLACK)
+                fixDoubleBlack(parent);
+            else
+                parent->color = BLACK;
         }
         }
     }
