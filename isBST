@@ -1,0 +1,55 @@
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+
+struct node
+{
+    int val;
+    struct node* left, *right;
+    node(int v)
+    {
+        val = v;
+        left = right = nullptr;
+    }
+};
+
+bool BSTutil(struct node* curNode, int min, int max)
+{
+    if(curNode == nullptr)
+        return true;
+        
+    if(curNode->val < min || curNode->val > max)
+        return false;
+
+    return BSTutil(curNode->left, min, curNode->val -1) && BSTutil(curNode->right, curNode->val + 1, max);
+}
+
+bool isBST(struct node* root)
+{
+    if(root == nullptr)
+        return true;
+    
+    return BSTutil(root, INT_MIN, INT_MAX);
+}
+
+int main() {
+	struct node* root = new struct node(50);
+	root->left = new struct node(30);
+	root->right = new struct node(70);
+	root->left->left = new struct node(20);
+	root->left->right = new struct node(40);
+	root->right->left = new struct node(60);
+	root->right->right = new struct node(80);
+	root->left->right->left = new struct node(35);
+	root->left->right->right = new struct node(45);
+	root->left->right->left->left = new struct node(37);
+	root->left->right->right = new struct node(38);
+	
+	if(isBST(root))
+	    cout << "Tree is BST" <<endl;
+	 else
+	    cout << "Tree is not BST" << endl; 
+	
+	return 0;
+}
