@@ -1,0 +1,68 @@
+//https://www.geeksforgeeks.org/modify-binary-tree-get-preorder-traversal-using-right-pointers/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+struct node
+{
+    int data;
+    struct node* left;
+    struct node* right;
+    
+    node(int val)
+    {
+        data = val;
+        left = right = nullptr;
+    }
+};
+
+struct node* modifyTree(struct node* curNode)
+{   
+    struct node* right = curNode->right;
+    struct node* rightmost = curNode;
+    
+    if(curNode->left)
+    {
+        rightmost = modifyTree(curNode->left);
+        
+        curNode->right = curNode->left;
+    
+        curNode->left = nullptr;
+    }
+    
+    if(!right)
+        return rightmost;
+    
+    rightmost->right = right;
+    
+    rightmost = modifyTree(curNode->right);
+    return rightmost;
+    
+}
+
+void preOrderTranversal(struct node* root)
+{
+    cout << " curNode : " << root->data;
+    preOrderTranversal(root->left);
+    preOrderTranversal(root->right);
+}
+
+void printRight(struct node* root)
+{
+    while(root != nullptr)
+    {
+        cout << "cur node : " << root->data << endl;
+        root = root->right;
+    }
+}
+
+int main()
+{   
+    struct node* root = new struct node(10);
+    root->left = new struct node(8); 
+    root->left->left = new struct node(3);
+    root->left->right = new struct node(5);
+    root->right = new struct node(2);
+    
+    modifyTree(root);
+    printRight(root);
+}
