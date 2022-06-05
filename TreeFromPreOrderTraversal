@@ -1,0 +1,37 @@
+#include <iostream>
+using namespace std;
+
+struct node
+{
+    int data;
+    struct node* left, *right;
+    
+    node(int val)
+    {
+        data = val;
+        left = right = nullptr;
+    }
+};
+
+struct node* constructTreeUtil(struct node* , int* indexPtr)
+{
+    if(*indexPtr > n)
+        return
+    if(nodeLoc[index] == 'N')
+    {
+        temp->left = constructTreeUtil();
+        temp->right = constructTreeUtil();
+    }
+    return ;
+}
+struct node* constructTree(int arrTreeNode[], char nodeLoc[], int n)
+{
+    
+}
+int main() {
+    int arrTreeNode = { 10, 30, 20, , 15 };
+    char nodeLoc = {'N', 'N', 'L', 'L', 'L'};
+    int n = sizeof(arrTreeNode) / sizeof(arrTreeNode[0]);
+	struct node* = constructTree(arrTreeNode, nodeLoc, n);
+	return 0;
+}
