@@ -13,7 +13,7 @@ struct node
     }
 };
 
-struct node* constructTreeUtil(struct node* , int* indexPtr)
+struct node* constructTreeUtil(int arrTreeNode[], char nodeLoc[], int* indexPtr, int n)
 {
     int index = *indexPtr;
     
@@ -24,19 +24,32 @@ struct node* constructTreeUtil(struct node* , int* indexPtr)
     (*indexPtr)++;
     if(nodeLoc[index] == 'N')
     {
-        temp->left = constructTreeUtil(indexPtr);
-        temp->right = constructTreeUtil(indexPtr);
+        temp->left = constructTreeUtil(arrTreeNode, nodeLoc, indexPtr, n);
+        temp->right = constructTreeUtil(arrTreeNode, nodeLoc, indexPtr, n);
     }
-    return ;
+    return temp;
 }
 struct node* constructTree(int arrTreeNode[], char nodeLoc[], int n)
 {
-    
+    int index = 0;
+    return constructTreeUtil(arrTreeNode, nodeLoc, &index, n);
 }
+
+void preOrderTraversal(struct node* root)
+{
+    if(root == nullptr)
+        return;
+    cout << "cur node : " << root->data << endl;
+    preOrderTraversal(root->left);
+    preOrderTraversal(root->right);
+}
+
 int main() {
-    int arrTreeNode = { 10, 30, 20, , 15 };
-    char nodeLoc = {'N', 'N', 'L', 'L', 'L'};
+    int arrTreeNode[] = { 10, 30, 20, 5, 15 };
+    char nodeLoc[] = {'N', 'N', 'L', 'L', 'L'};
     int n = sizeof(arrTreeNode) / sizeof(arrTreeNode[0]);
-	struct node* = constructTree(arrTreeNode, nodeLoc, n);
+	struct node* root = constructTree(arrTreeNode, nodeLoc, n);
+	preOrderTraversal(root);
+	
 	return 0;
 }
