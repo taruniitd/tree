@@ -15,12 +15,17 @@ struct node
 
 struct node* constructTreeUtil(struct node* , int* indexPtr)
 {
-    if(*indexPtr > n)
-        return
+    int index = *indexPtr;
+    
+    if(*indexPtr >= n)
+        return nullptr;
+        
+    struct node* temp = new struct node(arrTreeNode[*indexPtr]);
+    (*indexPtr)++;
     if(nodeLoc[index] == 'N')
     {
-        temp->left = constructTreeUtil();
-        temp->right = constructTreeUtil();
+        temp->left = constructTreeUtil(indexPtr);
+        temp->right = constructTreeUtil(indexPtr);
     }
     return ;
 }
