@@ -1,0 +1,61 @@
+//https://www.geeksforgeeks.org/connect-nodes-at-same-level/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+struct node
+{
+    int data;
+    struct node* left, *right, * nextRight;
+    node(int val)
+    {
+        data = val;
+        left = right = = nextRight = nullptr;
+    }
+};
+
+void connectNode(struct node* root)
+{
+    if(root == nullptr)
+        return;
+    
+    queue<struct node> que;
+    
+    que.push_back(root);
+    
+    while(!que.empty())
+    {
+        struct node* temp = que.top();
+        que.pop();
+        
+        int queSize = que.size();
+        node* prev = nullptr;
+        
+        while(queSize--)
+        {
+            if(temp->left != nullptr)
+                que.push_back(temp->left);
+            if(temp->right != nullptr)
+                que.push_back(temp->right);
+                
+            if(prev != nullptr)
+                prev->nextRight = temp;
+            prev = temp;
+        }
+        prev->nextRight = nullptr;
+        
+    }
+}
+
+int main() {
+    struct node* root = new struct node(30);
+    root->left = new struct node(10);
+    root->right = new struct node(50);
+    root->left->left = new struct node(3);
+    root->left->right = new struct node(16);
+    root->right->left = new struct node(40);
+    root->right->right = new struct node(60);
+
+    connectNode(root);
+	return 0;
+}
