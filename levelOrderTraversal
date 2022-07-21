@@ -1,5 +1,7 @@
 //https://www.educative.io/m/level-order-traversal-binary-tree
 
+//https://www.educative.io/m/level-order-traversal-binary-tree
+//https://www.geeksforgeeks.org/level-order-tree-traversal/
 #include <iostream>
 #include <bits/stdc++.h>
 using namespace std;
@@ -18,27 +20,27 @@ struct node
 void levelOrderTraversal(struct node* root)
 {
     queue<struct node*> queueTree[2];
-    queue<struct node*> current_queue, next_queue;
+    queue<struct node*> *current_queue, *next_queue;
     
     int cur_level = 0;
     
     current_queue = &queueTree[0];
     next_queue = &queueTree[1];
-    current_queue.push(root);
+    current_queue->push(root);
     
-    while(current_queue != empty())
+    while(!current_queue->empty())
     {
-        struct node* cur_node = current_queue.top();
-        current_queue.pop();
+        struct node* cur_node = current_queue->front();
+        current_queue->pop();
         
-        cout << cur_node->data << "  " << endl;
+        cout << cur_node->data << "  ";
         
         if(cur_node->left != nullptr)
-            next_queue.push(cur_node->left);
+            next_queue->push(cur_node->left);
         if(cur_node->right != nullptr)
-            next_queue.push(cur_node->right);
+            next_queue->push(cur_node->right);
 
-        if(current_queue.empty())
+        if(current_queue->empty())
         {
             ++cur_level;
             current_queue = &queueTree[cur_level % 2];
@@ -48,6 +50,61 @@ void levelOrderTraversal(struct node* root)
     
 }
 
+void levelOrderTraversalUsingSingleQueue(struct node* root)
+{
+    if(root == nullptr)
+        return;
+    queue<struct node*> cur_queue;
+    cur_queue.push(root);
+    
+    while(!cur_queue.empty())
+    {
+        struct node* top = cur_queue.front();
+        cout << top->data << "   ";
+        cur_queue.pop();
+        
+        if(top->left != nullptr)
+            cur_queue.push(top->left);
+        if(top->right != nullptr)
+            cur_queue.push(top->right);
+    }
+}
+
+int height(struct node* root)
+{
+    if(root == nullptr)
+        return 0;
+    else
+    {
+        int lHeight = height(root->left);
+        int rHeight = height(root->right);
+        
+        if(lHeight > rHeight)
+            return (lHeight + 1);
+        else    
+            return (rHeight + 1);
+    }
+}
+void levelOrderTraversalWithoutQueueUtil(struct node* root, int cur_level)
+{
+    if(root == nullptr)
+        return;
+    if(cur_level == 1)
+        cout << root->data <<"  ";
+    else if(cur_level > 1)
+    {
+        levelOrderTraversalWithoutQueueUtil(root->left, cur_level - 1);
+        levelOrderTraversalWithoutQueueUtil(root->right, cur_level - 1);
+    }
+}
+void levelOrderTraversalWithoutQueue(struct node* root)
+{
+    int h = height(root);
+    for(int i = 1; i <= h; i++)
+    {
+        levelOrderTraversalWithoutQueueUtil(root, i);
+    }
+}
 int main()
 {
     struct node* root = new struct node(10);
@@ -56,5 +113,12 @@ int main()
     root->left->left = new struct node(20);
     root->left->right = new struct node(5);
     
+    cout << "Level order traversal using 2 queue " << endl;
     levelOrderTraversal(root);
+    cout << endl;
+    cout << "Level order traversal using single queue " << endl;
+    levelOrderTraversalUsingSingleQueue(root);
+    cout << endl;
+    cout << "Level order traversal using height and without queue " << endl;
+    levelOrderTraversalWithoutQueue(root);
 }
