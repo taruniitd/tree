@@ -1,0 +1,144 @@
+//https://www.geeksforgeeks.org/construct-tree-from-given-inorder-and-preorder-traversal/
+#include <iostream>
+#include <stack>
+#include <set>
+#include <unordered_map>
+using namespace std;
+
+class node
+{
+    public:
+    int data;
+    node* left;
+    node* right;
+    
+    node(int val) : data(val) 
+    {
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+set<node*> set_node;
+stack<node*> stack_node;
+
+node* buildTreeUsingStackSet(int pre_arr[], int in_arr[], int n)
+{
+    node* root = nullptr;
+    
+    for(int pre = 0, in = 0; pre < n;)
+    {
+        node* temp = nullptr;
+        do
+        {
+            temp = new node(pre_arr[pre]);
+            if(root == nullptr)
+                root = temp;
+            if(stack_node.size() > 0)
+            {
+                if(set_node.find(stack_node.top()) != set_node.end())
+                {
+                    set_node.erase(stack_node.top());
+                    stack_node.top()->right = temp;
+                    stack_node.pop();
+                }
+                else
+                {
+                    stack_node.top()->left = temp;
+                }
+            }stack_node.push(temp);
+        } while(pre_arr[pre++] != in_arr[in] && pre < n);
+        
+        temp = nullptr;
+        while(stack_node.size() > 0 && in < n && 
+                stack_node.top()->data == in_arr[in])
+        {
+            temp = stack_node.top();
+            stack_node.pop();
+            in++;
+        }
+        if(temp != nullptr)
+        {
+            set_node.insert(temp);
+            stack_node.push(temp);
+        }
+    }
+    return root;
+}
+
+int search(int in_arr[], int start, int end, int new_data)
+{
+    int i;
+    for(int i = start; i < end; i++)
+    {
+        if(in_arr[i] == new_data)
+            return i;
+    }
+}
+node* buildTreeUsingSearch(int pre_arr[], int in_arr[], int start, int end)
+{
+    static int pre_index =0;
+    
+    if(start > end)
+        return nullptr;
+    
+    node* temp = new node(pre_arr[pre_index++]);
+    if(start == end)
+        return temp;
+    
+    int in_index = search(in_arr, start, end, temp->data);
+    temp->left = buildTreeUsingSearch(pre_arr, in_arr, start, in_index - 1);
+    temp->right = buildTreeUsingSearch(pre_arr, in_arr, in_index + 1, end);
+    
+    return temp;
+}
+
+node* buildTreeUsingMapUtil(int pre_arr[], int in_arr[], int start, int end, unordered_map<int,int>& map_node)
+{
+    static int pre_index = 0;
+    if(start > end)
+        return nullptr;
+        int curr = pre_arr[pre_index++];
+    node* temp = new node(curr);
+    if(start == end)
+        return temp;
+    int in_index = map_node[curr];
+    
+    temp->left = buildTreeUsingMapUtil(pre_arr, in_arr, start, in_index - 1, map_node);
+    temp->right = buildTreeUsingMapUtil(pre_arr, in_arr, in_index + 1, end, map_node);
+    
+    return temp;
+}
+node* buildTreeUsingMap(int pre_arr[], int in_arr[], int n)
+{
+    unordered_map<int,int> map_node;
+    for(int i = 0; i < n; i++)
+        map_node[in_arr[i]] = i;
+    return buildTreeUsingMapUtil(pre_arr, in_arr, 0, n -1, map_node);
+}
+void printInorder(node* root)
+{
+    if(root == nullptr)
+        return;
+    printInorder(root->left);
+    cout << root->data << "  ";
+    printInorder(root->right);
+}
+int main()
+{
+    int in[] = { 9, 8, 4, 2, 10, 5, 10, 1, 6, 3, 13, 12, 7 };
+    int pre[] = { 1, 2, 4, 8, 9, 5, 10, 10, 3, 6, 7, 12, 13 };
+    int len = sizeof(in)/sizeof(int);
+    node* root;
+    root = buildTreeUsingStackSet(pre, in , len);
+    printInorder(root);
+    cout << endl;
+    cout << " using 2nd method " << endl;
+    root = buildTreeUsingSearch(pre, in , 0, len - 1);
+    printInorder(root);
+    cout << endl;
+    cout << " using 3rd method " << endl;
+    root = buildTreeUsingMap(pre, in , len);
+    printInorder(root);
+    return 0;
+}
