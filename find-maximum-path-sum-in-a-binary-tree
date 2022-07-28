@@ -1,0 +1,49 @@
+//https://www.geeksforgeeks.org/find-maximum-path-sum-in-a-binary-tree/
+#include <iostream>
+#include <climits>
+using namespace std;
+
+typedef struct node
+{
+    int data;
+    node* left;
+    node* right;
+    node(int val)
+    {
+        left = nullptr;
+        right = nullptr;
+        data = val;
+    }
+} node;
+
+int findMaxutil(node* root, int& res)
+{
+    if(root == nullptr)
+        return 0;
+    int l = findMaxutil(root->left, res);
+    int r = findMaxutil(root->right, res);
+    
+    int max_single = max(max(l,r) + root->data, root->data);
+    int max_top = max(max_single, l + r + root->data);
+    
+    res = max(res, max_top);
+    return max_single;
+}
+
+int findMaxPathSum(node* root)
+{
+    int res = INT_MIN;
+    
+    findMaxutil(root, res);
+    return res;
+}
+int main()
+{
+    node* root = new node(-50);
+    root->left = new node(-30);
+    root->right = new node(15);
+    root->left->left = new node(20);
+    root->left->right = new node(25);
+    root->right->left = new node(30);
+    cout << "Max path sum = " << findMaxPathSum(root);
+}
