@@ -1,0 +1,76 @@
+//https://www.geeksforgeeks.org/write-an-efficient-c-function-to-convert-a-tree-into-its-mirror-tree/
+#include <iostream>
+#include <queue>
+using namespace std;
+
+typedef struct treeNode
+{
+    int data;
+    treeNode *left;
+    treeNode *right;
+    treeNode(int val)
+    {
+        data = val;
+        left = right = nullptr;
+    }
+} treeNode;
+
+void invertTree(treeNode *node)
+{
+    if(node == nullptr)
+        return;
+    else
+    {
+        treeNode *temp;
+        invertTree(node->left);
+        invertTree(node->right);
+        
+        temp = node->left;
+        node->left = node->right;
+        node->right = temp;
+    }
+}
+void invertTreeUsingBfs(treeNode *node)
+{
+    if(node == nullptr)
+        return;
+    queue<treeNode*> queue_node;
+    queue_node.push(node);
+    
+    while(!queue_node.empty())
+    {
+        treeNode *cur = queue_node.front();
+        queue_node.pop();
+        
+        swap(cur->left, cur->right);
+        if(cur->left)
+            queue_node.push(cur->left);
+        if(cur->right)
+            queue_node.push(cur->right);
+    }
+}
+
+void inorder(treeNode *node)
+{
+    if(node == nullptr)
+        return;
+    inorder(node->left);
+    cout << node->data << "  ";
+    inorder(node->right);
+}
+int main() {
+	treeNode *node1 = new treeNode(1);
+	node1->left = new treeNode(2);
+	node1->right = new treeNode(3);
+	node1->left->left = new treeNode(4);
+	node1->left->right = new treeNode(5);
+	inorder(node1);
+	
+	invertTree(node1);
+	cout << endl;
+	inorder(node1);
+	cout << endl;
+	invertTreeUsingBfs(node1);
+	inorder(node1);
+	return 0;
+}
