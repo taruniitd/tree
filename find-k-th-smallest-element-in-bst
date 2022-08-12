@@ -1,0 +1,88 @@
+//https://www.geeksforgeeks.org/find-k-th-smallest-element-in-bst-order-statistics-in-bst/
+#include <iostream>
+using namespace std;
+
+typedef struct treeNode
+{
+    int data;
+    int lCount;
+    treeNode *left, *right;
+    treeNode(int val)
+    {
+        data = val;
+        left = right = nullptr;
+    }
+} treeNode;
+
+treeNode* insertBst(treeNode *root, int val)
+{
+    if(root == nullptr)
+        return new treeNode(val);
+    if(val < root->data)
+    {
+        root->left = insertBst(root->left, val);
+        root->lCount++;
+    }
+    else if(val > root->data)
+        root->right = insertBst(root->right, val);
+    return root;
+}
+
+int count = 0;
+treeNode* kthSmallest(treeNode *root, int &k)
+{
+    if(root == nullptr)
+        return nullptr;
+    treeNode *left = kthSmallest(root->left, k);
+    if(left != nullptr)
+        return left;
+    count++;
+    if(count == k)
+        return root;
+    return kthSmallest(root->right, k);
+}
+
+treeNode* kthSmallest_2(treeNode *root, int k)
+{
+    if(root == nullptr)
+        return nullptr;
+    int count_2 = root->lCount + 1;
+    if(count_2 == k)
+        return root;
+    if(count_2 > k)
+        return kthSmallest_2(root->left, k);
+    return kthSmallest_2(root->right, k - count_2);
+}
+
+void printKthSmallestElement(treeNode *root, int k)
+{
+    treeNode *res = kthSmallest(root, k);
+    if(res == nullptr)
+        cout << "there are less than k nodes in the BST";
+    else
+        cout << "Kth smallest node : " << res->data;
+        
+}
+
+void printKthSmallestElement_2(treeNode *root, int k)
+{
+    treeNode *res = kthSmallest_2(root, k);
+    if(res == nullptr)
+        cout << "there are less than k nodes in the BST";
+    else
+        cout << "Kth smallest node : " << res->data;
+        
+}
+int main() {
+    treeNode *root = nullptr;
+    int keys[] = { 20, 8, 22, 4, 12, 10, 14 } ;
+    
+    for(int x : keys)
+        root = insertBst(root, x);
+    int k = 3;
+    printKthSmallestElement(root, k);
+    cout << endl;
+    k = 5;
+    printKthSmallestElement_2(root, k);
+	return 0;
+}
