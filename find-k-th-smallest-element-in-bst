@@ -1,11 +1,11 @@
-//https://www.geeksforgeeks.org/find-k-th-smallest-element-in-bst-order-statistics-in-bst/
+//https://www.geeksforgeeks.org/lowest-common-ancestor-binary-tree-set-1/
 #include <iostream>
+#include <vector>
 using namespace std;
 
 typedef struct treeNode
 {
     int data;
-    int lCount;
     treeNode *left, *right;
     treeNode(int val)
     {
@@ -14,75 +14,100 @@ typedef struct treeNode
     }
 } treeNode;
 
-treeNode* insertBst(treeNode *root, int val)
+bool findPath(treeNode *root, vector<int> &path, int k)
 {
     if(root == nullptr)
-        return new treeNode(val);
-    if(val < root->data)
+        return false;
+    path.push_back(root->data);
+    if(root->data == k)
+        return true;
+    if( (root->left && findPath(root->left, path, k)) ||
+        (root->right && findPath(root->right, path, k)) )
+        return true;
+    path.pop_back();
+    return false;
+}
+int findLCA(treeNode *root, int n1, int n2)
+{
+    vector<int> path1, path2;
+    
+    if(!findPath(root, path1, n1) || !findPath(root, path2, n2))
+        return -1;
+    int i;
+    for( i = 0; i < path1.size() && i < path2.size(); i++)
+        if(path1[i] != path2[i])
+            break;
+    return path1[i - 1];
+}
+
+treeNode* findLCAUsingSingleTraversal(treeNode *root, int n1, int n2)
+{
+    if(root == nullptr)
+        return nullptr;
+    if(root->data == n1 || root->data == n2)
+        return root;
+    treeNode *left_lca = findLCAUsingSingleTraversal(root->left, n1, n2);
+    treeNode *right_lca = findLCAUsingSingleTraversal(root->right, n1, n2);
+    
+    if(left_lca && right_lca)
+        return root;
+    return (left_lca != nullptr) ? left_lca : right_lca;
+}
+
+treeNode* findLCAUtil(treeNode *root, int n1, int n2, bool &v1, bool &v2)
+{
+    if(root == nullptr)
+        return nullptr;
+    if(root->data == n1)
     {
-        root->left = insertBst(root->left, val);
-        root->lCount++;
+        v1 = true;
+        return root;
     }
-    else if(val > root->data)
-        root->right = insertBst(root->right, val);
-    return root;
+    if(root->data == n2)
+    {
+        v2 = true;
+        return root;
+    }
+    
+    treeNode *left_lca = findLCAUtil(root->left, n1, n2, v1, v2);
+    treeNode *right_lca = findLCAUtil(root->right, n1, n2, v1, v2);
+    
+    if(left_lca && right_lca)
+        return root;
+    return (left_lca != nullptr) ? left_lca : right_lca;
 }
-
-int count = 0;
-treeNode* kthSmallest(treeNode *root, int &k)
+bool find(treeNode *root, int k)
 {
     if(root == nullptr)
-        return nullptr;
-    treeNode *left = kthSmallest(root->left, k);
-    if(left != nullptr)
-        return left;
-    count++;
-    if(count == k)
-        return root;
-    return kthSmallest(root->right, k);
+        return false;
+    if(root->data == k || find(root->left, k) || find(root->right, k))
+        return true;
+    return false;
 }
-
-treeNode* kthSmallest_2(treeNode *root, int k)
+treeNode* findLCAForOnenotPresent(treeNode* root, int n1, int n2)
 {
-    if(root == nullptr)
-        return nullptr;
-    int count_2 = root->lCount + 1;
-    if(count_2 == k)
-        return root;
-    if(count_2 > k)
-        return kthSmallest_2(root->left, k);
-    return kthSmallest_2(root->right, k - count_2);
-}
-
-void printKthSmallestElement(treeNode *root, int k)
-{
-    treeNode *res = kthSmallest(root, k);
-    if(res == nullptr)
-        cout << "there are less than k nodes in the BST";
-    else
-        cout << "Kth smallest node : " << res->data;
-        
-}
-
-void printKthSmallestElement_2(treeNode *root, int k)
-{
-    treeNode *res = kthSmallest_2(root, k);
-    if(res == nullptr)
-        cout << "there are less than k nodes in the BST";
-    else
-        cout << "Kth smallest node : " << res->data;
-        
+    bool v1 = false, v2 = false;
+    treeNode *lca = findLCAUtil(root, n1, n2, v1, v2);
+    
+    if(v1 && v2 || v1 && find(lca, n2) || v2 && find(lca, n1))
+        return lca;
+    return nullptr;
 }
 int main() {
-    treeNode *root = nullptr;
-    int keys[] = { 20, 8, 22, 4, 12, 10, 14 } ;
+    treeNode *root = new treeNode(1);
+    root->left = new treeNode(2);
+    root->right = new treeNode(3);
+    root->left->left = new treeNode(4);
+    root->left->right = new treeNode(5);
+    root->right->left = new treeNode(6);
+    root->right->right = new treeNode(7);
     
-    for(int x : keys)
-        root = insertBst(root, x);
-    int k = 3;
-    printKthSmallestElement(root, k);
-    cout << endl;
-    k = 5;
-    printKthSmallestElement_2(root, k);
+    cout << "LCA(4,5) = " << findLCA(root, 4, 5) << endl;
+    cout << "LCA(4,5) = " << findLCAUsingSingleTraversal(root, 4, 5)->data << endl;
+    treeNode* lca = findLCAForOnenotPresent(root, 4, 5);
+    if(lca != nullptr)
+        cout << "LCA(4,5) = " << lca->data;
+    else
+        cout << "keys r not present " << endl;
 	return 0;
 }
