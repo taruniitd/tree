@@ -1,0 +1,73 @@
+//https://www.geeksforgeeks.org/lowest-common-ancestor-binary-tree-set-1/
+#include <iostream>
+#include <vector>
+using namespace std;
+
+typedef struct treeNode
+{
+    int data;
+    treeNode *left, *right;
+    treeNode(int val)
+    {
+        data = val;
+        left = right = nullptr;
+    }
+} treeNode;
+
+bool findPath(treeNode *root, vector<int> &path, int k)
+{
+    if(root == nullptr)
+        return false;
+    path.push_back(root->data);
+    if(root->data == k)
+        return true;
+    if( (root->left && findPath(root->left, path, k)) ||
+        (root->right && findPath(root->right, path, k)) )
+        return true;
+    path.pop_back();
+    return false;
+}
+int findLCA(treeNode *root, int n1, int n2)
+{
+    vector<int> path1, path2;
+    
+    if(!findPath(root, path1, n1) || !findPath(root, path2, n2))
+        return -1;
+    int i;
+    for( i = 0; i < path1.size() && i < path2.size(); i++)
+        if(path1[i] != path2[i])
+            break;
+    return path1[i - 1];
+}
+
+treeNode* findLCAUsingSingleTraversal(treeNode *root, int n1, int n2)
+{
+    if(root == nullptr)
+        return nullptr;
+    if(root->data == n1 || root->data == n2)
+        return root;
+    treeNode *left_lca = findLCAUsingSingleTraversal(root->left, n1, n2);
+    treeNode *right_lca = findLCAUsingSingleTraversal(root->right, n1, n2);
+    
+    if(left_lca && right_lca)
+        return root;
+    return (left_lca != nullptr) ? left_lca : right_lca;
+}
+int main() {
+    treeNode *root = new treeNode(1);
+    root->left = new treeNode(2);
+    root->right = new treeNode(3);
+    root->left->left = new treeNode(4);
+    root->left->right = new treeNode(5);
+    root->right->left = new treeNode(6);
+    root->right->right = new treeNode(7);
+    
+    cout << "LCA(4,5) = " << findLCA(root, 4, 5) << endl;
+    cout << "LCA(4,5) = " << findLCAUsingSingleTraversal(root, 4, 5)->data;
+    treeNode* lca = findLCAForOnenotPresent(root, 4, 5);
+    if(lca != nullptr)
+        cout << "LCA(4,5) = " << lca->data;
+    else
+        cout << "keys r not present " << endl;
+	return 0;
+}
