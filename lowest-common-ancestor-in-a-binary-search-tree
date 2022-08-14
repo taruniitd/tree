@@ -1,0 +1,43 @@
+//https://www.geeksforgeeks.org/lowest-common-ancestor-in-a-binary-search-tree/
+#include <iostream>
+using namespace std;
+
+typedef struct treeNode
+{
+    int data;
+    treeNode *left, *right;
+    treeNode(int val)
+    {
+        data = val;
+        left = right = nullptr;
+    }
+} treeNode;
+
+treeNode* lca(treeNode* root, int n1, int n2)
+{
+    while(root != nullptr)
+    {
+        if(root->data > n1 && root->data > n2)
+            root = root->left;
+        else if(root->data < n1 && root->data < n2)
+            root = root->right;
+        else 
+            break;
+    }
+    return root;
+}
+
+int main() {
+	treeNode *root = new treeNode(15);
+	root->left = new treeNode(7);
+	root->right = new treeNode(20);
+	root->left->left = new treeNode(5);
+	root->left->right = new treeNode(9);
+	root->left->right->left = new treeNode(8);
+	root->left->right->right = new treeNode(10);
+	
+	int n1 = 5, n2 = 9;
+	treeNode* temp = lca(root, n1, n2);
+	cout << "lca of " << n1 << "and" << n2 << "is" << temp->data;
+	return 0;
+}
