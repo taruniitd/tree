@@ -1,0 +1,123 @@
+//https://www.geeksforgeeks.org/check-if-a-binary-tree-is-subtree-of-another-binary-tree/
+//https://www.geeksforgeeks.org/check-binary-tree-subtree-another-binary-tree-set-2/
+#include <iostream>
+#include <cstring>
+using namespace std;
+#define MAX 100
+class treeNode
+{
+    public:
+    int data;
+    treeNode* left, *right;
+};
+
+treeNode* newNode(int val)
+{
+    treeNode* temp = new treeNode();
+    temp->data = val;
+    temp->left = nullptr;
+    temp->right = nullptr;
+    return temp;
+}
+
+bool areIdentical(treeNode* root, treeNode* subRoot)
+{
+    if((root == nullptr) && (subRoot == nullptr))    
+        return true;
+    if((root == nullptr) || (subRoot == nullptr))
+        return false;
+    return (root->data == subRoot->data &&
+            areIdentical(root->left, subRoot->left) &&
+            areIdentical(root->right, subRoot->right));
+}
+
+bool isSubTree(treeNode* root, treeNode* subRoot)
+{
+    if(subRoot == nullptr)
+        return true;
+    if(root == nullptr)
+        return false;
+    if(areIdentical(root, subRoot))
+        return true;
+    return isSubTree(root->left, subRoot ) || isSubTree(root->right, subRoot);
+}
+
+void storeInOrder(treeNode* root, char arr[], int &i)
+{
+    if(root == nullptr)
+    {
+        arr[i++] = '$';
+        return;
+    }
+    storeInOrder(root->left, arr, i);
+    arr[i++] = root->data;
+    storeInOrder(root->right, arr, i);
+}
+
+void storePreOrder(treeNode* root, char arr[], int &i)
+{
+    if(root == nullptr)
+    {
+        arr[i++] = '$';
+        return;
+    }
+    storePreOrder(root->left, arr, i);
+    arr[i++] = root->data;
+    storePreOrder(root->right, arr, i);
+}
+
+bool isSubTreeUsingPreAndInOrder(treeNode* root, treeNode* subRoot)
+{
+    if(subRoot == nullptr)
+        return true;
+    if(root == nullptr)
+        return false;
+    int m = 0, n = 0;
+    char inT[MAX], inS[MAX];
+    storeInOrder(root, inT, m);
+    storeInOrder(subRoot, inS, n);
+    inT[m] = '\0';
+    inT[n] = '\0';
+    
+    if(strstr(inT, inS) == nullptr)
+        return false;
+    
+    m = 0, n = 0;
+    char preT[MAX], preS[MAX];
+    storePreOrder(root, inT, m);
+    storePreOrder(root, inS, n);
+    preT[m] = '\0';
+    preS[n] = '\0';
+    
+    if(strstr(preT, preS) == nullptr)
+        return false;
+    return true;
+    
+}
+
+
+int main() {
+	treeNode* root = newNode(26);
+	root->right = newNode(3);
+	root->right->right = newNode(3);
+	root->left = newNode(10);
+	root->left->left = newNode(4);
+	root->left->left->right = newNode(30);
+	root->left->right = newNode(6);
+	
+	treeNode* subRoot = newNode(10);
+	subRoot->left = newNode(4);
+	subRoot->left->right = newNode(30);
+	subRoot->right = newNode(6);
+	
+	if(isSubTree(root, subRoot))
+	    cout << "Tree 2 is sub tree of root";
+	else
+	    cout << "Tree 2 is not sub tree of root";
+	cout << endl;
+	if(isSubTreeUsingPreAndInOrder(root, subRoot))
+	    cout << "Tree 2 is sub tree of root";
+	else
+	    cout << "Tree 2 is not sub tree of root";
+	return 0;
+}
